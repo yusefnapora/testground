@@ -62,7 +62,7 @@ testground -vv run dht/find-peers \
     --build-cfg push_registry=true \
     --build-cfg registry_type=dockerhub \
     --run-cfg keep_service=true \
-    --instances=10
+    --instances=16
 ```
 
 ## Destroying the cluster

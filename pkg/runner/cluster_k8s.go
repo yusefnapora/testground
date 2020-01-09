@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -94,6 +95,12 @@ func (*ClusterK8sRunner) Run(ctx context.Context, input *api.RunInput, ow io.Wri
 		TestInstanceCount:  input.Instances,
 		TestInstanceParams: input.Parameters,
 		TestSidecar:        true,
+	}
+
+	var err error
+	_, runenv.TestSubnet, err = net.ParseCIDR("10.33.10.0/24")
+	if err != nil {
+		return nil, err
 	}
 
 	env := util.ToEnvVar(runenv.ToEnvVars())
