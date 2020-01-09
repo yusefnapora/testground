@@ -105,6 +105,13 @@ func (*ClusterK8sRunner) Run(ctx context.Context, input *api.RunInput, ow io.Wri
 
 	env := util.ToEnvVar(runenv.ToEnvVars())
 
+	redisCfg := v1.EnvVar{
+		Name:  "REDIS_HOST",
+		Value: "redis-master",
+	}
+
+	env = append(env, redisCfg)
+
 	// Define k8s client configuration
 	config := defaultKubernetesConfig()
 	k8scfg, err := clientcmd.BuildConfigFromFlags("", config.KubeConfigPath)
