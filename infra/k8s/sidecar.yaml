@@ -15,9 +15,9 @@ spec:
       hostPID: true
       containers:
       - name: testground-sidecar
-        image: ipfs/testground:latest
+        image: nonsens3/testground:latest
         command: ["testground"]
-        args: ["sidecar", "--runner", "docker"]
+        args: ["sidecar", "--runner", "k8s"]
         securityContext:
           capabilities:
             add: ["NET_ADMIN", "SYS_ADMIN"]

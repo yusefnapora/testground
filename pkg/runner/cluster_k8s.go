@@ -141,6 +141,9 @@ func (*ClusterK8sRunner) Run(ctx context.Context, input *api.RunInput, ow io.Wri
 						"testground.testcase": testcase.Name,
 						"testground.runid":    input.RunID,
 					},
+					Annotations: map[string]string{
+						"cni": "flannel,weave",
+					},
 				},
 				Spec: v1.PodSpec{
 					RestartPolicy: v1.RestartPolicyNever,
