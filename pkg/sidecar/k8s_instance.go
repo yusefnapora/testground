@@ -16,6 +16,7 @@ import (
 	"github.com/vishvananda/netns"
 
 	"github.com/ipfs/testground/pkg/dockermanager"
+	"github.com/ipfs/testground/pkg/logging"
 	"github.com/ipfs/testground/sdk/runtime"
 	"github.com/ipfs/testground/sdk/sync"
 )
@@ -255,6 +256,7 @@ func (n *K8sNetwork) ConfigureNetwork(ctx context.Context, cfg *sync.NetworkConf
 	if online && ((cfg.IPv6 != nil && !link.IPv6.IP.Equal(cfg.IPv6.IP)) ||
 		(cfg.IPv4 != nil && !link.IPv4.IP.Equal(cfg.IPv4.IP))) {
 		// Disconnect and reconnect to change the IP addresses.
+		logging.S().Debug("disconnect and reconnect to change the IP addr", "cfg.IPv4", cfg.IPv4, "link.IPv4", link.IPv4.String(), "container", n.container.ID)
 		//
 		// NOTE: We probably don't need to do this on local docker.
 		// However, we probably do with swarm.
