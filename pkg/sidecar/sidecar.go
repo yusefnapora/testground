@@ -54,6 +54,11 @@ func Run(runnerName string) error {
 			}
 		}()
 
+		instance.Network.ConfigureNetwork(ctx, &sync.NetworkConfig{
+			Network: "default",
+			Enable:  true,
+		})
+
 		/* TODO: Initialize all networks to the "down" state.
 		for _, n := range instance.Network.ListActive() {
 			instance.Network.ConfigureNetwork(&sync.NetworkConfig{

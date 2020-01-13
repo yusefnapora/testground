@@ -105,13 +105,14 @@ func (d *K8sInstanceManager) manageContainer(ctx context.Context, container *doc
 
 	// Finally, construct the network manager.
 	network := &K8sNetwork{
-		netnsPath:   fmt.Sprintf("/proc/%d/ns/net", info.State.Pid),
-		cninet:      cninet,
-		container:   container,
-		subnet:      runenv.TestSubnet.String(),
-		activeLinks: make(map[string]*k8sLink, len(info.NetworkSettings.Networks)),
-		nl:          netlinkHandle,
+		netnsPath: fmt.Sprintf("/proc/%d/ns/net", info.State.Pid),
+		cninet:    cninet,
+		container: container,
+		subnet:    runenv.TestSubnet.String(),
+		nl:        netlinkHandle,
 	}
+
+	return NewInstance(runenv, info.Config.Hostname, network)
 
 	// TODO(anteva): remove all routes but redis and the data subnet
 
@@ -174,7 +175,6 @@ func (d *K8sInstanceManager) manageContainer(ctx context.Context, container *doc
 	//}
 	//}
 	//}
-	return NewInstance(runenv, info.Config.Hostname, network)
 }
 
 func localAddresses() {
@@ -321,83 +321,85 @@ func (n *K8sNetwork) ConfigureNetwork(ctx context.Context, cfg *sync.NetworkConf
 }
 
 func (n *K8sNetwork) ListActive() []string {
+	panic("not implemented yet")
 	return []string{}
 }
 
 func (n *K8sNetwork) ListAvailable() []string {
+	panic("not implemented yet")
 	return []string{}
 }
 
-func attach(addr string, netns string, containerID string, ifName string) error {
-	// <addr>     = [ip:]<cidr> | net:<cidr> | net:default
+//func attach(addr string, netns string, containerID string, ifName string) error {
+//// <addr>     = [ip:]<cidr> | net:<cidr> | net:default
 
-	// addr := "net:10.36.79.0/24"
-	// ip := "10.36.79.10/24"
-	// netns := "" // abs path
-	// containerID := ""
-	// ifName := "net1"
+//// addr := "net:10.36.79.0/24"
+//// ip := "10.36.79.10/24"
+//// netns := "" // abs path
+//// containerID := ""
+//// ifName := "net1"
 
-	// we assume that this is mapped as a volume
-	cniBinPath := filepath.SplitList("/host/opt/cni/bin")
+//// we assume that this is mapped as a volume
+//cniBinPath := filepath.SplitList("/host/opt/cni/bin")
 
-	bytes := []byte(`
-{
-    "cniVersion": "0.3.0",
-    "name": "weave",
-    "plugins": [
-        {
-            "name": "weave",
-            "type": "weave-net",
-						"ipam": {
-								"subnet": "` + addr + `"
-						},
-            "hairpinMode": true
-        }
-    ]
-}
-`)
+//bytes := []byte(`
+//{
+//"cniVersion": "0.3.0",
+//"name": "weave",
+//"plugins": [
+//{
+//"name": "weave",
+//"type": "weave-net",
+//"ipam": {
+//"subnet": "` + addr + `"
+//},
+//"hairpinMode": true
+//}
+//]
+//}
+//`)
 
-	netconf, err := libcni.ConfListFromBytes(bytes)
-	if err != nil {
-		return err
-	}
+//netconf, err := libcni.ConfListFromBytes(bytes)
+//if err != nil {
+//return err
+//}
 
-	cniArgs := [][2]string{}                   // empty
-	capabilityArgs := map[string]interface{}{} // empty
+//cniArgs := [][2]string{}                   // empty
+//capabilityArgs := map[string]interface{}{} // empty
 
-	cninet := libcni.NewCNIConfig(cniBinPath, nil)
+//cninet := libcni.NewCNIConfig(cniBinPath, nil)
 
-	rt := &libcni.RuntimeConf{
-		ContainerID:    containerID,
-		NetNS:          netns,
-		IfName:         ifName,
-		Args:           cniArgs,
-		CapabilityArgs: capabilityArgs,
-	}
+//rt := &libcni.RuntimeConf{
+//ContainerID:    containerID,
+//NetNS:          netns,
+//IfName:         ifName,
+//Args:           cniArgs,
+//CapabilityArgs: capabilityArgs,
+//}
 
-	_, err = cninet.AddNetworkList(context.TODO(), netconf, rt)
-	if err != nil {
-		return err
-	}
+//_, err = cninet.AddNetworkList(context.TODO(), netconf, rt)
+//if err != nil {
+//return err
+//}
 
-	return nil
-}
+//return nil
+//}
 
 func buildNCL(addr string) (*libcni.NetworkConfigList, error) {
 	bytes := []byte(`
 {
-    "cniVersion": "0.3.0",
-    "name": "weave",
-    "plugins": [
-        {
-            "name": "weave",
-            "type": "weave-net",
+		"cniVersion": "0.3.0",
+		"name": "weave",
+		"plugins": [
+				{
+						"name": "weave",
+						"type": "weave-net",
 						"ipam": {
 								"subnet": "` + addr + `"
 						},
-            "hairpinMode": true
-        }
-    ]
+						"hairpinMode": true
+				}
+		]
 }
 `)
 
