@@ -320,6 +320,8 @@ func (n *K8sNetwork) ConfigureNetwork(ctx context.Context, cfg *sync.NetworkConf
 			NetlinkLink: handle,
 			IPv4:        v4addrs[0],
 			IPv6:        nil,
+			rt:          rt,
+			netconf:     netconf,
 		}
 		n.activeLinks[cfg.Network] = link
 	}
