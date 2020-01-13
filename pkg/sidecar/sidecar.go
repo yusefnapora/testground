@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/ipfs/testground/pkg/logging"
 	"github.com/ipfs/testground/sdk/sync"
 )
 
@@ -45,6 +46,8 @@ func Run(runnerName string) error {
 		return fmt.Errorf("failed to initialize sidecar: %s", err)
 	}
 
+	logging.S().Infow("starting sidecar", "runner", runnerName)
+
 	defer manager.Close()
 
 	return manager.Manage(ctx, func(ctx context.Context, instance *Instance) error {
@@ -54,10 +57,13 @@ func Run(runnerName string) error {
 			}
 		}()
 
-		instance.Network.ConfigureNetwork(ctx, &sync.NetworkConfig{
+		err := instance.Network.ConfigureNetwork(ctx, &sync.NetworkConfig{
 			Network: "default",
 			Enable:  true,
 		})
+		if err != nil {
+			return err
+		}
 
 		/* TODO: Initialize all networks to the "down" state.
 		for _, n := range instance.Network.ListActive() {

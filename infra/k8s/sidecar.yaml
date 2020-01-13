@@ -21,7 +21,7 @@ spec:
       - name: testground-sidecar
         image: nonsens3/testground:latest
         command: ["testground"]
-        args: ["sidecar", "--runner", "k8s"]
+        args: ["--vv", "sidecar", "--runner", "k8s"]
         securityContext:
           capabilities:
             add: ["NET_ADMIN", "SYS_ADMIN"]

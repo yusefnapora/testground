@@ -49,9 +49,15 @@ func (d *K8sInstanceManager) Manage(
 	worker func(ctx context.Context, inst *Instance) error,
 ) error {
 	return d.manager.Manage(ctx, func(ctx context.Context, container *dockermanager.Container) error {
+		d.manager.S().Debugw("manage container id", "id", container.ID)
 		inst, err := d.manageContainer(ctx, container)
 		if err != nil {
 			return fmt.Errorf("when initializing the container: %w", err)
+		}
+		// ignore that container
+		if inst == nil {
+			d.manager.S().Debugw("ignoring container id", "id", container.ID)
+			return nil
 		}
 		err = worker(ctx, inst)
 		if err != nil {
@@ -261,7 +267,8 @@ func (n *K8sNetwork) ConfigureNetwork(ctx context.Context, cfg *sync.NetworkConf
 	if !online {
 		// No, we're not.
 		// Connect.
-		netconf, err := buildNCL("net:" + n.subnet)
+		//netconf, err := buildNCL("net:" + n.subnet)
+		netconf, err := buildNCL(n.subnet)
 
 		if cfg.IPv4 != nil {
 			netconf, err = buildNCL(cfg.IPv4.IP.String())
