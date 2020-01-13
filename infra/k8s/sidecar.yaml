@@ -33,8 +33,13 @@ spec:
         volumeMounts:
           - name: dockersock
             mountPath: "/var/run/docker.sock"
+          - name: cnibin
+            mountPath: "/host/opt/cni/bin"
       volumes:
       - name: dockersock
         hostPath:
           path: /var/run/docker.sock
+      - name: cnibin
+        hostPath:
+          path: /opt/cni/bin
 
