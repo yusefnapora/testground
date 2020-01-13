@@ -346,13 +346,11 @@ func (n *K8sNetwork) ConfigureNetwork(ctx context.Context, cfg *sync.NetworkConf
 }
 
 func (n *K8sNetwork) ListActive() []string {
-	panic("not implemented yet")
-	return []string{}
-}
-
-func (n *K8sNetwork) ListAvailable() []string {
-	panic("not implemented yet")
-	return []string{}
+	networks := make([]string, 0, len(n.activeLinks))
+	for name := range n.activeLinks {
+		networks = append(networks, name)
+	}
+	return networks
 }
 
 //func attach(addr string, netns string, containerID string, ifName string) error {

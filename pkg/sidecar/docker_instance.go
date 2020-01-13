@@ -273,20 +273,10 @@ func (dn *DockerNetwork) Close() error {
 	return nil
 }
 
-func (dn *DockerNetwork) ListAvailable() []string {
-	networks := make([]string, 0, len(dn.availableLinks))
-	for network := range dn.availableLinks {
-		networks = append(networks, network)
-	}
-	return networks
-}
-
 func (dn *DockerNetwork) ListActive() []string {
 	networks := make([]string, 0, len(dn.activeLinks))
-	for name := range dn.availableLinks {
-		if _, ok := dn.activeLinks[name]; ok {
-			networks = append(networks, name)
-		}
+	for name := range dn.activeLinks {
+		networks = append(networks, name)
 	}
 	return networks
 }
