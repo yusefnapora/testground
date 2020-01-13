@@ -58,7 +58,7 @@ func (d *K8sInstanceManager) Manage(
 			return fmt.Errorf("container worker failed: %w", err)
 		}
 		return nil
-	}, "testground.runid")
+	})
 }
 
 func (d *K8sInstanceManager) Close() error {
@@ -72,9 +72,6 @@ func (d *K8sInstanceManager) manageContainer(ctx context.Context, container *doc
 		return nil, fmt.Errorf("inspect failed: %w", err)
 	}
 
-	// Initialise CNI config
-	cninet := libcni.NewCNIConfig(filepath.SplitList("/host/opt/cni/bin"), nil)
-
 	if !info.State.Running {
 		return nil, fmt.Errorf("not running")
 	}
@@ -84,6 +81,13 @@ func (d *K8sInstanceManager) manageContainer(ctx context.Context, container *doc
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse run environment: %w", err)
 	}
+
+	if runenv.TestSidecar == false {
+		return nil, nil
+	}
+
+	// Initialise CNI config
+	cninet := libcni.NewCNIConfig(filepath.SplitList("/host/opt/cni/bin"), nil)
 
 	// Get a netlink handle.
 	nshandle, err := netns.GetFromPid(info.State.Pid)
