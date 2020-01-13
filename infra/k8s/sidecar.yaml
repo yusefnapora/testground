@@ -26,7 +26,8 @@ spec:
         args: ["--vv", "sidecar", "--runner", "k8s"]
         securityContext:
           capabilities:
-            add: ["NET_ADMIN", "SYS_ADMIN"]
+            add: ["NET_ADMIN", "SYS_ADMIN", "SYS_TIME"]
+          privileged: true
         env:
         - name: REDIS_HOST
           value: "redis-headless"

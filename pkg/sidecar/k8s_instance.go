@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 
 	"github.com/containernetworking/cni/libcni"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/vishvananda/netlink"
 	"github.com/vishvananda/netns"
 
@@ -115,11 +116,12 @@ func (d *K8sInstanceManager) manageContainer(ctx context.Context, container *doc
 
 	// Finally, construct the network manager.
 	network := &K8sNetwork{
-		netnsPath: fmt.Sprintf("/proc/%d/ns/net", info.State.Pid),
-		cninet:    cninet,
-		container: container,
-		subnet:    runenv.TestSubnet.String(),
-		nl:        netlinkHandle,
+		netnsPath:   fmt.Sprintf("/proc/%d/ns/net", info.State.Pid),
+		cninet:      cninet,
+		container:   container,
+		subnet:      runenv.TestSubnet.String(),
+		nl:          netlinkHandle,
+		activeLinks: make(map[string]*k8sLink),
 	}
 
 	return NewInstance(runenv, info.Config.Hostname, network)
@@ -243,7 +245,7 @@ func (n *K8sNetwork) ConfigureNetwork(ctx context.Context, cfg *sync.NetworkConf
 		if online {
 			// No. Disconnect.
 			if err := n.cninet.DelNetworkList(ctx, link.netconf, link.rt); err != nil {
-				return err
+				return fmt.Errorf("when 6: %w", err)
 			}
 			delete(n.activeLinks, cfg.Network)
 		}
@@ -258,7 +260,7 @@ func (n *K8sNetwork) ConfigureNetwork(ctx context.Context, cfg *sync.NetworkConf
 		// However, we probably do with swarm.
 		online = false
 		if err := n.cninet.DelNetworkList(ctx, link.netconf, link.rt); err != nil {
-			return err
+			return fmt.Errorf("when 5: %w", err)
 		}
 		delete(n.activeLinks, cfg.Network)
 	}
@@ -289,24 +291,26 @@ func (n *K8sNetwork) ConfigureNetwork(ctx context.Context, cfg *sync.NetworkConf
 			CapabilityArgs: capabilityArgs,
 		}
 
+		spew.Dump(rt)
+
 		_, err = n.cninet.AddNetworkList(ctx, netconf, rt)
 		if err != nil {
-			return err
+			return fmt.Errorf("when AddNetworkList: %w", err)
 		}
 
 		netlinkByName, err := n.nl.LinkByName(ifName)
 		if err != nil {
-			return err
+			return fmt.Errorf("when 2: %w", err)
 		}
 
 		// Register an active link.
 		handle, err := NewNetlinkLink(n.nl, netlinkByName)
 		if err != nil {
-			return err
+			return fmt.Errorf("when new netlink link: %w", err)
 		}
 		v4addrs, err := handle.ListV4()
 		if err != nil {
-			return err
+			return fmt.Errorf("when 3: %w", err)
 		}
 		if len(v4addrs) != 1 {
 			return errors.New("expected 1 v4addrs")
@@ -326,7 +330,7 @@ func (n *K8sNetwork) ConfigureNetwork(ctx context.Context, cfg *sync.NetworkConf
 	}
 
 	if err := link.Shape(cfg.Default); err != nil {
-		return err
+		return fmt.Errorf("when 4: %w", err)
 	}
 	return nil
 }

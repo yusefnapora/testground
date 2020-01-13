@@ -9,6 +9,8 @@ ARG GO_VERSION=1.13.4
 # TODO: Not sure how this interplays with image caching.
 FROM golang:${GO_VERSION}-buster
 
+RUN apt update && apt install -y net-tools netcat traceroute iputils-ping wget curl telnet iproute2 dnsutils
+
 # GO_IPFS_VERSION is the go-ipfs version to include in this image.
 ARG GO_IPFS_VERSION
 # TESTPLAN_EXEC_PKG is the executable package of the testplan to build.
